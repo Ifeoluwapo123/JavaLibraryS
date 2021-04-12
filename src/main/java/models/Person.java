@@ -19,6 +19,7 @@ public class Person implements Comparable<Person>{
         this.id = id;
         this.name = name;
         this.role = role;
+        this.request = null;
 
 
         if(role.equalsIgnoreCase("Teacher")){
@@ -92,12 +93,20 @@ public class Person implements Comparable<Person>{
         return level;
     }
 
+    public String getName(){
+        return name;
+    }
+
     public String getRole(){
         return role;
     }
 
     public void setRequest(String request) {
         this.request = request;
+    }
+
+    public int getId() {
+        return id;
     }
 
     @Override
@@ -107,6 +116,7 @@ public class Person implements Comparable<Person>{
                 ", id=" + id +
                 ", role='" + role + '\'' +
                 ", level=" + level +
+                ", request='" + request + '\'' +
                 '}';
     }
 }

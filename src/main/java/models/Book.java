@@ -35,7 +35,7 @@ public class Book implements Comparable<Book>{
         this.year = 0;
     }
 
-    public Book(int id,int numOfCopies, String author, String country, String imageLink, String language,String link, String getImageLink, int pages, String title, int year) {
+    public Book(int id, int numOfCopies, String author, String country, String imageLink, String language,String link, String getImageLink, int pages, String title, int year) {
         this.author = author;
         this.id = id;
         this.numOfCopies = numOfCopies;

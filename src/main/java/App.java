@@ -69,6 +69,9 @@ public class App {
         System.out.println(teacher.getClass().getTypeName());
         System.out.println(userPriorityQueue.getClass().getTypeName());
 
+        System.out.println(teacher instanceof Person);
+//        System.out.println(userPriorityQueue instanceof Person);
+
     }
 
 }
