@@ -2,52 +2,59 @@ package services.serviceImplementations;
 
 import models.Book;
 import models.Person;
+import services.Librarian;
 import utilities.BookStore;
 import utilities.Display;
 import utilities.LibraryRecords;
-
 import java.text.DateFormat;
 import java.util.*;
 
-public class LibrarianImplementation {
-    private Display<Person, Book, LibraryRecords> display;
+public class LibrarianImplementation implements Librarian {
+    private static Display<Person, Book, LibraryRecords> display;
     private static Integer defaultDay = 7;
 
-    public String createBook() {
+    public static Book createBook() {
         Scanner scanner = new Scanner(System.in);
         char response = ' ';
 
-
         System.out.println("ENTER BOOK CATEGORY: \n");
-        String category = scanner.nextLine();
+        String category = scanner.next();
 
         System.out.println("ENTER BOOK TITLE: \n");
-        String title = scanner.nextLine();
+        String title = scanner.next();
 
         System.out.println("BOOK AUTHOR: \n");
-        String author = scanner.nextLine();
+        String author = scanner.next();
+
+        String promptYearCreated = "ENTER YEAR PUBLISHED \n";
+        int year = handlingNumberFormatException(promptYearCreated, scanner);
+
+        String promptNoOfPages = "ENTER NUMBER OF PAGES \n";
+        int pages = handlingNumberFormatException(promptNoOfPages, scanner);
+
+        System.out.println("BOOK LANGUAGE: \n");
+        String language = scanner.next();
+
+        System.out.println("BOOK COUNTRY: \n");
+        String country = scanner.next();
+
+        System.out.println("BOOK IMAGE LINK: \n");
+        String imageLink = scanner.next();
+
+        System.out.println("BOOK LINK: \n");
+        String link  = scanner.next();
 
         String promptNoOfCopies = "ENTER NUMBER OF COPIES \n";
-
         int numOfCopies = handlingNumberFormatException(promptNoOfCopies, scanner);
 
-        boolean isBorrow = false;
-        do {
-            System.out.println("CAN THE BOOK BE BORROWED? y/n: \n");
-            response = scanner.next().charAt(0);
-            if (response == 'y') {
-                isBorrow = true;
-            } else if (response == 'n') {
-                isBorrow = true;
-            } else {
-                System.out.println("Try Again! ");
-            }
-        } while (response != 'y' && response != 'n');
+        Book newBook = new Book(BookStore.getAllBooks().size()+1, numOfCopies, author, country, category,imageLink,
+                language,link, pages, title, year);
 
-        return "";
+        BookStore.updateBooks(newBook);
+        return newBook;
     }
 
-    private int handlingNumberFormatException(String prompt, Scanner sc1) {
+    private static int handlingNumberFormatException(String prompt, Scanner sc1) {
         int intInput = 0;
         while (true) {
             System.out.println(prompt);
@@ -62,69 +69,74 @@ public class LibrarianImplementation {
         return intInput;
     }
 
-    public static void setBookIssuedRecord(Person person, Book book){
-        String records = "";
+    public static void setBookIssuedRecord(Person person, List<Book> book){
+        String records = "\n";
         if(person.getRole().equalsIgnoreCase("Teacher"))
-            records += "Staff ID "+ person.getId()+"\n";
-        else records += "Student ID "+ person.getId()+"\n";
+            records += "Staff ID: "+ person.getId()+"\n";
+        else records += "Student ID: "+ person.getId()+"\n";
+
+
 
         records += "Name: "+ person.getName()+"\n"+
-                "Book Title: "+ book.getTitle()+"\n"+
+                "Book Title: "+ book.get(0).getTitle()+"\n"+
                 "Date Issued: "+generateCurrentDate()+" "+getCurrentTime()+"\n"+
-                "Return Date: "+getDateToReturnBook();
+                "Return Date: "+getDateToReturnBook()+"\n";
 
         LibraryRecords.updateDateRecord(person.getId(),records);
     }
 
-    public static Map<Integer, String> getBookIssuedRecord(){
-        return LibraryRecords.getRecords();
-    }
-
-    public String returnBook(Person librarian, Person student){
+    public static Map<Integer, String> getBookIssuedRecord(Person librarian){
         if(librarian.getRole().equalsIgnoreCase("Librarian")){
-            deleteRecord(student);
+            display.displayRecordInformation(librarian, LibraryRecords.getRecords());
+            return LibraryRecords.getRecords();
+        }else{
+            System.out.println("You don't have access to this action");
         }
 
-
-        return "";
+        return null;
     }
 
-   private String deleteRecord(Person student){
+    public static String returnBook(Person librarian, Person student){
+        String message = "";
+        if(librarian.getRole().equalsIgnoreCase("Librarian")){
+            message = deleteRecord(student);
+        }
+        return message;
+    }
+
+    private static String deleteRecord(Person person){
         Map<Integer, String> records;
         String message = ""; int counter = 0;
         records = LibraryRecords.getRecords();
 
         for (Map.Entry<Integer, String> each: records.entrySet()) {
-            if(each.getKey().equals(student.getId()))
-            {
-                records.remove(student.getId());
-                message = "Student record successfully deleted";
-                counter+=1;
-            }
+            if(each.getKey().equals(person.getId())) counter++;
         }
-        if(counter==0) {
-            message = "You did not borrow any book!";
+
+        if(counter == 0) {
+            message = person.getName()+": You did not borrow any book from us";
+        }else{
+            records.remove(person.getId());
+            message = person.getName()+ ": Book returned, Borrower's record successfully deleted";
         }
 
         return message;
     }
 
-
-    public <T> String issueBook(Person librarian, T object){
+    public static <T> String issueBook(Person librarian, T object){
         String message = "";
         if(librarian.getRole().equalsIgnoreCase("librarian")){
             if(object instanceof Person){
                 Person person = (Person) object;
                 if(person.getRequest() != null){
-                    String request = person.getRequest();
-                    String[] bookData = request.split(":");
-                    List<Book> bookIssued = BookStore.getBook(bookData[0], bookData[1]);
+                    String request = person.getRequest().trim();
+                    List<Book> bookIssued = BookStore.getBook(request);
                     if(bookIssued.size() > 0){
                         message = "successful";
                         // display book to user
                         display = new Display<>();
-                        display.displayInformation(person,bookIssued);
-                        setBookIssuedRecord(person,(Book) bookIssued);
+                        display.displayRecordInformation(person,bookIssued);
+                        setBookIssuedRecord(person, bookIssued);
                     }
                 }else{
                     message = "failed";
@@ -134,22 +146,23 @@ public class LibrarianImplementation {
                 PriorityQueue que = (PriorityQueue) object;
                 Person person = (Person) que.peek();
                 if(person.getRequest() != null) {
-                    String request = person.getRequest();
-                    String[] bookData = request.split(":");
-                    List<Book> bookIssued = BookStore.getBook(bookData[0], bookData[1]);
-                    setBookIssuedRecord(person, (Book) bookIssued);
+                    String request = person.getRequest().trim();
+                    List<Book> bookIssued = BookStore.getBook(request);
+                    setBookIssuedRecord(person, bookIssued);
                     display = new Display<>();
                     //display for the person
-                    display.displayInformation(person, bookIssued);
+                    display.displayRecordInformation(person, bookIssued);
+                    setBookIssuedRecord(person, bookIssued);
                     //display others with no book
                     que.remove(que.peek());
                     Iterator<Person> iterator = que.iterator();
 
-                    String result = "Book not issued to\n";
+                    String result = "Book not issued to \n";
                     while (iterator.hasNext()){
-                        result += ((Person) que.poll()).getName()+"\n";
-                        System.out.println(result);
+                        result += "\t\t"+((Person) que.poll()).getName()+"\n";
                     }
+                    System.out.println(result);
+                    message = "successful";
                 }else{
                     message = "failed";
                     System.out.println("Make a request for a book first");
@@ -160,11 +173,13 @@ public class LibrarianImplementation {
         }else{
             System.out.println("Can't use this method");
         }
+
         return message;
     }
 
-   public void makeBookRequest(Person person, String title, String author){
-        person.setRequest(author+":"+title);
+   public static void makeBookRequest(Person librarian, Person person, String title){
+        person.setRequest(title);
+        System.out.println(person.getName()+", You've successfully made a request for a book");
    }
 
     private static String generateCurrentDate(){
@@ -178,7 +193,7 @@ public class LibrarianImplementation {
         return currentDate;
     }
 
-    private static  String getCurrentTime(){
+    private static String getCurrentTime(){
         Calendar calendar = Calendar.getInstance();
         int hours = calendar.get(Calendar.HOUR_OF_DAY);
         int minutes = calendar.get(Calendar.MINUTE);
@@ -187,21 +202,11 @@ public class LibrarianImplementation {
         return " "+hours+":"+minutes+":"+seconds;
     }
 
-    public static String getDateToReturnBook(){
+    private static String getDateToReturnBook(){
         String currentDate = generateCurrentDate();
-//        String firstSet = currentDate.substring(0,currentDate.indexOf(","));
-//        String secondSet = currentDate.substring(currentDate.indexOf(",")+1);
-//        String[] str = firstSet.split(" ");
-//        int days = Integer.parseInt(str[1]) + numberOfDays;
-
-//        return str[0]+" "+days+","+secondSet;
         String[] str = currentDate.split(" ");
         str[1] = Integer.parseInt(str[1].substring(0, str[1].indexOf(",")))+defaultDay+"";
 
         return str[0]+" "+str[1]+", "+str[2];
-
     }
-
-
-
 }

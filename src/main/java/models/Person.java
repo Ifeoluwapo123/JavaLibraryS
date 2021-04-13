@@ -1,7 +1,7 @@
 package models;
 
-import java.util.List;
-import java.util.Locale;
+import enums.Role;
+
 import java.util.regex.Pattern;
 
 public class Person implements Comparable<Person>{
@@ -15,12 +15,33 @@ public class Person implements Comparable<Person>{
         return request;
     }
 
-    public Person(int id, String name, String role){
+    public Person(int id, String name, String role) throws InstantiationException {
+
+        Role roles;
+        try {
+            roles = Role.valueOf(role.toUpperCase());
+        }catch (IllegalArgumentException error){
+            System.out.println("Enter valid Role:\n e.g NON_TEACHING_STAFF,\n" +
+                    "    TEACHER,\n" +
+                    "    STUDENT");
+            throw new InstantiationException("You Entered an invalid Role");
+        }
+
+        switch (roles){
+            case STUDENT:
+                this.role = "Student";
+                break;
+            case TEACHER:
+                this.role = "Teacher";
+                break;
+            case LIBRARIAN:
+                this.role = "Librarian";
+                break;
+        }
+
         this.id = id;
         this.name = name;
-        this.role = role;
         this.request = null;
-
 
         if(role.equalsIgnoreCase("Teacher")){
             this.level = 17;
@@ -38,7 +59,7 @@ public class Person implements Comparable<Person>{
     public String setLevel(String level){
         String message;
         if(!this.levelValidity(level)){
-            message ="Failed to set level";
+            message ="failed";
         } else {
             int lastDigit = Integer.parseInt(level.charAt(level.length()-1)+"");
             String newLevel = level.toLowerCase();
@@ -52,7 +73,7 @@ public class Person implements Comparable<Person>{
                 case 3:
                     assignLevel(newLevel, 3);
             }
-            message = "Successfully set you level";
+            message = "successful";
         }
         return  message;
     }
@@ -70,6 +91,7 @@ public class Person implements Comparable<Person>{
     private boolean levelValidity(String studentClass){
         boolean validLevel = Pattern.compile("^[J]?([S]*)[1-3]$",
                 Pattern.CASE_INSENSITIVE).matcher(studentClass).find();
+        if(!validLevel) System.out.println(this.name+": Enter a valid Class");
         return validLevel;
     }
 

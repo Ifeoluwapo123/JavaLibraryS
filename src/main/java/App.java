@@ -1,77 +1,78 @@
+import models.Book;
 import models.Person;
+import services.serviceImplementations.LibrarianImplementation;
+import utilities.BookStore;
 
 import java.util.PriorityQueue;
-import java.util.regex.Pattern;
 
 public class App {
-    public static void main(String[] args) {
-        //boolean validLevel = "ss".matches("/^[SJ&&S]$d[1-6]/")
-       // boolean validLevel = Pattern.compile("^([J]?([S]*)*)[1-3]$").matcher("SJ3").find();
-        boolean validLevel = Pattern.compile("^[J]?([S]*)[1-3]$", Pattern.CASE_INSENSITIVE).matcher("sS3").find();
-        boolean validLevel1 = Pattern.compile("^[J]?([S]*)[1-3]$").matcher("SS2").find();
-        boolean validLevel2 = Pattern.compile("^[J]?([S]*)[1-3]$").matcher("SS1").find();
-        boolean validLevel3 = Pattern.compile("^[J]?([S]*)[1-3]$").matcher("JS3").find();
-        boolean validLevel4 = Pattern.compile("^[J]?([S]*)[1-3]$").matcher("JS2").find();
-        boolean validLevel5 = Pattern.compile("^[J]?([S]*)[1-3]$").matcher("JS1").find();
+    public static void main(String[] args) throws InstantiationException {
+        Person librarian = new Person(29, "Amos James", "Librarian");
+        Person teacher1 = new Person(33, "George Tim", "Teacher");
+        Person teacher2 = new Person(35, "Sunday Anthony", "Teacher");
+        Person teacher3 = new Person(43, "Abraham Edward", "Teacher");
 
-        boolean validLevel6 = Pattern.compile("^[J]?([S]*)[1-3]$").matcher("SJ3").find();
-        boolean validLevel7 = Pattern.compile("^[J]?([S]*)[1-3]$").matcher("JJ3").find();
+        BookStore.searchBookByCategory("programming");
 
-//        System.out.println(validLevel);
-//        System.out.println(validLevel1);
-//        System.out.println(validLevel2);
-//        System.out.println(validLevel3);
-//        System.out.println(validLevel4);
-//        System.out.println(validLevel5);
-//        System.out.println("FALSE "+validLevel6);
-//        System.out.println("FALSE "+validLevel7);
-//
-        Person teacher = new Person(11, "Randy", "Teacher");
-        System.out.println(teacher.getLevel());
-//
-//        Person teacher2 = new Person(15, "Bandy", "Teacher");
-//        System.out.println(teacher2.getLevel());
-//
-//        Person student1 = new Person(10, "dammy", "Student");
-//        student1.setLevel("JS2");
-//        System.out.println(student1.getLevel());
-//
-//        Person student2 = new Person(13, "joy", "Student");
-//        student2.setLevel("JS2");
-//        System.out.println(student2.getLevel());
-//
-//        Person student3 = new Person(12, "dam", "Student");
-//        student3.setLevel("SS2");
-//        System.out.println(student3.getLevel());
-//
-        PriorityQueue<Person> userPriorityQueue = new PriorityQueue<>();
-//        userPriorityQueue.add(student1);
-//        userPriorityQueue.add(student2);
-//        userPriorityQueue.add(student3);
-        userPriorityQueue.add(teacher);
-//        userPriorityQueue.add(teacher2);
-//
-//        Iterator<Person> iterator = userPriorityQueue.iterator();
-//
-//        while (iterator.hasNext()){
-//            System.out.println(userPriorityQueue.poll().toString());
-//        }
-//
-//        // Printing the top element of PriorityQueue
-//        System.out.println(userPriorityQueue.peek());
-//
-//        // Printing the top element and removing it
-//        // from the PriorityQueue container
-//        System.out.println(pQueue.poll());
-//
-//        // Printing the top element again
-//        System.out.println(pQueue.peek());
-        System.out.println(teacher.getClass().getTypeName());
-        System.out.println(userPriorityQueue.getClass().getTypeName());
+        LibrarianImplementation.makeBookRequest(librarian, teacher1, "A Doll's House");
+        LibrarianImplementation.makeBookRequest(librarian, teacher2, "A Doll's House");
+        LibrarianImplementation.makeBookRequest(librarian, teacher3, "A Doll's House");
 
-        System.out.println(teacher instanceof Person);
-//        System.out.println(userPriorityQueue instanceof Person);
+        System.out.println(teacher1.getRequest());
+        System.out.println(teacher2.getRequest());
+
+        if(teacher1.getRequest().equalsIgnoreCase(teacher2.getRequest())
+                && teacher2.getRequest().equalsIgnoreCase(teacher3.getRequest())){
+            PriorityQueue<Person> priorityQueue = new PriorityQueue<>();
+            priorityQueue.add(teacher1);
+            priorityQueue.add(teacher2);
+            priorityQueue.add(teacher3);
+
+            LibrarianImplementation.issueBook(librarian, priorityQueue);
+        }
+
+        Person teacher4 = new Person(30, "James Bond", "Teacher");
+        Person student1 = new Person(21, "Adewale Adekunle", "Student");
+        String message = student1.setLevel("SS3");
+
+        LibrarianImplementation.makeBookRequest(librarian, teacher4, "Oedipus the King");
+        if(message.equals("successful"))
+            LibrarianImplementation.makeBookRequest(librarian, student1, "Oedipus the King");
+
+
+        if(student1.getRequest().equalsIgnoreCase(teacher4.getRequest())){
+            PriorityQueue<Person> priorityQueue = new PriorityQueue<>();
+            if(message.equals("successful")) priorityQueue.add(student1);
+            priorityQueue.add(teacher4);
+
+            LibrarianImplementation.issueBook(librarian, priorityQueue);
+        }else if(teacher4.getRequest() != null) LibrarianImplementation.issueBook(librarian, teacher4);
+        else if(student1.getRequest() != null)  LibrarianImplementation.issueBook(librarian, student1);
+
+        Person student2 = new Person(19, "Henry Clinton", "Student");
+        String mess = student2.setLevel("JSS3");
+        if(mess.equals("successful")) LibrarianImplementation.makeBookRequest(librarian, student2, "Oedipus the King");
+
+        if(student1.getRequest().equalsIgnoreCase(student2.getRequest())){
+            PriorityQueue<Person> priorityQueue = new PriorityQueue<>();
+            if(mess.equals("successful")) priorityQueue.add(student2);
+            if(message.equals("successful")) priorityQueue.add(student1);
+
+            LibrarianImplementation.issueBook(librarian, priorityQueue);
+        }else if(student1.getRequest() != null) LibrarianImplementation.issueBook(librarian, student1);
+        else if(teacher2.getRequest() != null) LibrarianImplementation.issueBook(librarian, student2);
+
+
+        LibrarianImplementation.getBookIssuedRecord(librarian);
+
+        System.out.println("\n"+LibrarianImplementation.returnBook(librarian,teacher4));
+        System.out.println("\n"+LibrarianImplementation.returnBook(librarian, teacher2));
+        System.out.println("\n"+LibrarianImplementation.returnBook(librarian, student2));
+        System.out.println("\n"+LibrarianImplementation.returnBook(librarian, student1));
+        System.out.println("\n"+LibrarianImplementation.returnBook(librarian, teacher1));
+
+        Book newBook = LibrarianImplementation.createBook();
+        System.out.println(BookStore.getBook(newBook.getTitle()));
 
     }
-
 }

@@ -3,38 +3,50 @@ package utilities;
 import models.Book;
 import models.Person;
 
-import java.text.DateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class Display<M,T,E> {
 
-    public  <M, T> void displayInformation(M obj, T obj2) {
-       if(obj instanceof Person && obj2 instanceof Book){
+    public  <M, T> void displayRecordInformation(M obj, T obj2) {
+       if(obj instanceof Person && obj2 instanceof List){
            String display = "";
-           System.out.println("==============================================\n");
+           System.out.println("\n==============================================");
 
            if(((Person) obj).getRole().equalsIgnoreCase("Teacher"))
-               display += "Staff ID "+ ((Person) obj).getId()+"\n";
-           else display += "Student ID "+ ((Person) obj).getId()+"\n";
+               display += "Staff ID: "+ ((Person) obj).getId()+"\n";
+           else display += "Student ID: "+ ((Person) obj).getId()+"\n";
+
            display += "Name: "+ ((Person) obj).getName()+"\n"+
-                      "Book Borrowed: "+ ((Book) obj2).getTitle()+"\n"+
-                      "\t\t Book Title: "+((Book) obj2).getAuthor()+"\n"+
-                      "\t\t Author Name: "+((Book) obj2).getAuthor()+"\n";
+                      "Book Borrowed: \n"+
+                      "\t\t Title: "+((List<Book>) obj2).get(0).getTitle()+"\n"+
+                      "\t\t Name: "+((List<Book>) obj2).get(0).getAuthor()+"\n";
 
            System.out.println(display);
 
-       }else if(obj instanceof Person && obj2 instanceof LibraryRecords){
+           System.out.println("==============================================\n");
+       }else if(obj instanceof Person && obj2 instanceof Map){
 
+           System.out.println("==============================================\n");
+
+           for(Object i: ((Map<Integer, String>) obj2).entrySet()){
+               System.out.println(i);
+           }
+
+           System.out.println("==============================================\n");
        }
     }
 
-    public  static <T> void displayArrayInformation(T elements) {
-        if(elements instanceof Person){
+    public void displayBookInformation(List<Book> sortedBooks){
+        System.out.println("\n======================================================" +
+                               "================= Lists Of Sorted Books " +
+                "=======================================================================");
 
-        }else{
-
+        for (Book book : sortedBooks){
+            System.out.println(book+"\n");
         }
-    }
 
+        System.out.println("=======================================================================" +
+                "=====================================================================================\n");
+    }
 }
