@@ -156,7 +156,7 @@ public class BookStore{
             borrowBook.add(book);
         }
 
-        display.displayBookInformation(borrowBook);
+//        display.displayBookInformation(borrowBook);
 
         return borrowBook;
 

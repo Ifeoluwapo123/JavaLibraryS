@@ -10,7 +10,7 @@ import java.text.DateFormat;
 import java.util.*;
 
 public class LibrarianImplementation implements Librarian {
-    private static Display<Person, Book, LibraryRecords> display;
+    private static Display<Person, Book, LibraryRecords> display = new Display<>();
     private static Integer defaultDay = 7;
 
     public static Book createBook() {
@@ -128,47 +128,60 @@ public class LibrarianImplementation implements Librarian {
         if(librarian.getRole().equalsIgnoreCase("librarian")){
             if(object instanceof Person){
                 Person person = (Person) object;
-                if(person.getRequest() != null){
-                    String request = person.getRequest().trim();
-                    List<Book> bookIssued = BookStore.getBook(request);
-                    if(bookIssued.size() > 0){
-                        message = "successful";
-                        // display book to user
-                        display = new Display<>();
-                        display.displayRecordInformation(person,bookIssued);
-                        setBookIssuedRecord(person, bookIssued);
-                    }
-                }else{
-                    message = "failed";
-                    System.out.println("Make a request for a book first");
+                String request = person.getRequest().trim();
+                List<Book> bookIssued = BookStore.getBook(request);
+
+                if(bookIssued.size() > 0){
+                    message = "successful";
+                    // display book to user
+                    display = new Display<>();
+                    display.displayRecordInformation(person,bookIssued);
+                    setBookIssuedRecord(person, bookIssued);
                 }
+
             }else {
                 PriorityQueue que = (PriorityQueue) object;
                 Person person = (Person) que.peek();
-                if(person.getRequest() != null) {
-                    String request = person.getRequest().trim();
-                    List<Book> bookIssued = BookStore.getBook(request);
+                String request = person.getRequest().trim();
+                List<Book> bookIssued = BookStore.getBook(request);
+                int copiesOfBook = bookIssued.get(0).getNumOfCopies();
+
+                if(copiesOfBook == 1){
                     setBookIssuedRecord(person, bookIssued);
-                    display = new Display<>();
                     //display for the person
                     display.displayRecordInformation(person, bookIssued);
                     setBookIssuedRecord(person, bookIssued);
+
                     //display others with no book
                     que.remove(que.peek());
                     Iterator<Person> iterator = que.iterator();
 
                     String result = "Book not issued to \n";
+
                     while (iterator.hasNext()){
                         result += "\t\t"+((Person) que.poll()).getName()+"\n";
                     }
+
                     System.out.println(result);
-                    message = "successful";
-                }else{
-                    message = "failed";
-                    System.out.println("Make a request for a book first");
+                }else {
+                    Iterator<Person> iterator = que.iterator();
+
+                    String result = "Book not issued to \n";
+
+                    while (iterator.hasNext()){
+                        copiesOfBook--;
+                        display.displayRecordInformation(que.peek(), bookIssued);
+                        setBookIssuedRecord(person, bookIssued);
+                        ((Person) que.poll()).getName();
+                        if(copiesOfBook == 0) break;
+                    }
+
+                    if(que.size()>0)
+                        System.out.println(result+"\t\t"+((Person) que.peek()).getName());
                 }
 
                 que.clear();
+                message = "successful";
             }
         }else{
             System.out.println("Can't use this method");

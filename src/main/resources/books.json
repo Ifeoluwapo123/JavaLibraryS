@@ -2,7 +2,7 @@
   {
     "id": 1,
     "author": "Chinua Achebe",
-    "numOfCopies": 5,
+    "numOfCopies": 1,
     "country": "Nigeria",
     "category": "Journals",
     "imageLink": "images/things-fall-apart.jpg",
@@ -116,7 +116,6 @@
   },
   {
     "id": 10,
-
     "numOfCopies": 3,
     "author": "Samuel Beckett",
     "country": "Republic of Ireland",
@@ -584,7 +583,7 @@
   },
   {
     "id": 46,
-    "numOfCopies": 32,
+    "numOfCopies": 1,
     "author": "Henrik Ibsen",
     "country": "Norway",
     "imageLink": "images/a-Dolls-house.jpg",
@@ -1089,7 +1088,7 @@
   },
   {
     "id": 85,
-    "numOfCopies": 4,
+    "numOfCopies": 1,
     "author": "Sophocles",
     "country": "Greece",
     "category": "Literature",
