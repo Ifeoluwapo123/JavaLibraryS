@@ -13,47 +13,58 @@ public class LibrarianImplementation implements Librarian {
     private static Display<Person, Book, LibraryRecords> display = new Display<>();
     private static Integer defaultDay = 7;
 
-    public static Book createBook() {
-        Scanner scanner = new Scanner(System.in);
-        char response = ' ';
+    public static Book createBook(Person librarian) {
+        if(librarian.getRole().equalsIgnoreCase("Librarian")){
+            Scanner scanner = new Scanner(System.in);
+            char response = ' ';
 
-        System.out.println("ENTER BOOK CATEGORY: \n");
-        String category = scanner.next();
+            System.out.println("ENTER BOOK CATEGORY: \n");
+            String category = scanner.next();
 
-        System.out.println("ENTER BOOK TITLE: \n");
-        String title = scanner.next();
+            System.out.println("ENTER BOOK TITLE: \n");
+            String title = scanner.next();
 
-        System.out.println("BOOK AUTHOR: \n");
-        String author = scanner.next();
+            System.out.println("BOOK AUTHOR: \n");
+            String author = scanner.next();
 
-        String promptYearCreated = "ENTER YEAR PUBLISHED \n";
-        int year = handlingNumberFormatException(promptYearCreated, scanner);
+            String promptYearCreated = "ENTER YEAR PUBLISHED \n";
+            int year = handlingNumberFormatException(promptYearCreated, scanner);
 
-        String promptNoOfPages = "ENTER NUMBER OF PAGES \n";
-        int pages = handlingNumberFormatException(promptNoOfPages, scanner);
+            String promptNoOfPages = "ENTER NUMBER OF PAGES \n";
+            int pages = handlingNumberFormatException(promptNoOfPages, scanner);
 
-        System.out.println("BOOK LANGUAGE: \n");
-        String language = scanner.next();
+            System.out.println("BOOK LANGUAGE: \n");
+            String language = scanner.next();
 
-        System.out.println("BOOK COUNTRY: \n");
-        String country = scanner.next();
+            System.out.println("BOOK COUNTRY: \n");
+            String country = scanner.next();
 
-        System.out.println("BOOK IMAGE LINK: \n");
-        String imageLink = scanner.next();
+            System.out.println("BOOK IMAGE LINK: \n");
+            String imageLink = scanner.next();
 
-        System.out.println("BOOK LINK: \n");
-        String link  = scanner.next();
+            System.out.println("BOOK LINK: \n");
+            String link  = scanner.next();
 
-        String promptNoOfCopies = "ENTER NUMBER OF COPIES \n";
-        int numOfCopies = handlingNumberFormatException(promptNoOfCopies, scanner);
+            String promptNoOfCopies = "ENTER NUMBER OF COPIES \n";
+            int numOfCopies = handlingNumberFormatException(promptNoOfCopies, scanner);
 
-        Book newBook = new Book(BookStore.getAllBooks().size()+1, numOfCopies, author, country, category,imageLink,
-                language,link, pages, title, year);
+            Book newBook = new Book(BookStore.getAllBooks().size()+1, numOfCopies, author, country, category,imageLink,
+                    language,link, pages, title, year);
 
-        BookStore.updateBooks(newBook);
-        return newBook;
+            BookStore.updateBooks(newBook);
+            return newBook;
+        }else{
+            System.out.println("You don't have access to this action");
+            return  null;
+        }
     }
 
+    /**
+     *  Used for the create book method, perhaps user enters string instead of a number
+     *  @param prompt
+     *  @param sc1
+     *  @params int
+     * */
     private static int handlingNumberFormatException(String prompt, Scanner sc1) {
         int intInput = 0;
         while (true) {
@@ -69,6 +80,12 @@ public class LibrarianImplementation implements Librarian {
         return intInput;
     }
 
+    /**
+     *  This method is called everytime a book is issued to save the person
+     *  and book information
+     *  @param person
+     *  @param book
+     * */
     public static void setBookIssuedRecord(Person person, List<Book> book){
         String records = "\n";
         if(person.getRole().equalsIgnoreCase("Teacher"))
@@ -123,13 +140,31 @@ public class LibrarianImplementation implements Librarian {
         return message;
     }
 
+    /**
+     *  Accepts a que of persons objects or a single person as an argument
+     *  Gives book to a person or give books to the persons in que based on
+     *  the copies of the book we have in the library
+     *  if book doesn't go round, then people with highest priority on the
+     *  list get book first and others denied (Not issued).
+     *  @param librarian
+     *  @param object
+     *  @return String
+     * */
     public static <T> String issueBook(Person librarian, T object){
         String message = "";
         if(librarian.getRole().equalsIgnoreCase("librarian")){
             if(object instanceof Person){
                 Person person = (Person) object;
-                String request = person.getRequest().trim();
-                List<Book> bookIssued = BookStore.getBook(request);
+
+                String request = "";
+
+                try{
+                    request = person.getRequest().trim();
+                }catch(NullPointerException e){
+                    return "failed";
+                }
+
+                List<Book> bookIssued = BookStore.getBook(request);;
 
                 if(bookIssued.size() > 0){
                     message = "successful";
@@ -142,42 +177,35 @@ public class LibrarianImplementation implements Librarian {
             }else {
                 PriorityQueue que = (PriorityQueue) object;
                 Person person = (Person) que.peek();
-                String request = person.getRequest().trim();
+                String request = "";
+
+                try{
+                    request = person.getRequest().trim();
+                }catch(NullPointerException e){
+                    return "failed";
+                }
+
                 List<Book> bookIssued = BookStore.getBook(request);
+
                 int copiesOfBook = bookIssued.get(0).getNumOfCopies();
 
-                if(copiesOfBook == 1){
+                Iterator<Person> iterator = que.iterator();
+
+                String result = "Book not issued to \n";
+
+                while (iterator.hasNext()){
+                    copiesOfBook--;
+                    display.displayRecordInformation(que.peek(), bookIssued);
                     setBookIssuedRecord(person, bookIssued);
-                    //display for the person
-                    display.displayRecordInformation(person, bookIssued);
-                    setBookIssuedRecord(person, bookIssued);
+                    ((Person) que.poll()).getName();
+                    if(copiesOfBook == 0) break;
+                }
 
-                    //display others with no book
-                    que.remove(que.peek());
-                    Iterator<Person> iterator = que.iterator();
-
-                    String result = "Book not issued to \n";
-
-                    while (iterator.hasNext()){
-                        result += "\t\t"+((Person) que.poll()).getName()+"\n";
-                    }
-
-                    System.out.println(result);
-                }else {
-                    Iterator<Person> iterator = que.iterator();
-
-                    String result = "Book not issued to \n";
-
-                    while (iterator.hasNext()){
-                        copiesOfBook--;
-                        display.displayRecordInformation(que.peek(), bookIssued);
-                        setBookIssuedRecord(person, bookIssued);
-                        ((Person) que.poll()).getName();
-                        if(copiesOfBook == 0) break;
-                    }
-
-                    if(que.size()>0)
-                        System.out.println(result+"\t\t"+((Person) que.peek()).getName());
+                //other persons that doesn't get the book
+                iterator = que.iterator();
+                int count = 0;
+                while (iterator.hasNext()){
+                    System.out.println(result+"\t\t"+((Person) que.poll()).getName()+"\n");
                 }
 
                 que.clear();

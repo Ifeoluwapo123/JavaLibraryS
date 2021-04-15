@@ -1,6 +1,6 @@
 package models;
 
-public class Book implements Comparable<Book>{
+public class Book implements Comparable<Book>, interfaces.Book {
 
     private int id;
     private int numOfCopies;
@@ -34,6 +34,9 @@ public class Book implements Comparable<Book>{
         this.year = 0;
     }
 
+    /**
+     *  This Constructor uses json mapper, to map data from the books.json file
+     * */
     public Book() {
         this.id = 0;
         this.author = "";

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.Book;
 import org.json.simple.parser.JSONParser;
-
 import java.io.*;
 import java.util.List;
 
@@ -14,15 +13,15 @@ public class JsonFileReader {
     private static String path;
     private static String absolutePath = "src/main/resources/";
 
-    public static List parseJsonFile(String filename){
+    public static List parseJsonFile(String filename) throws IOException {
 
         JSONParser parser = new JSONParser();
         List<Book> booksList = null;
         path = absolutePath+filename;
-
+        InputStream stream = null;
         try {
             ObjectMapper mapper = new ObjectMapper();
-            InputStream stream =new FileInputStream(path);
+            stream =new FileInputStream(path);
             TypeReference<List<Book>> listReference = new TypeReference<List<Book>>() {};
             booksList = mapper.readValue(stream,listReference);
         }
@@ -41,6 +40,8 @@ public class JsonFileReader {
         catch (IOException ex)
         {
             ex.printStackTrace();
+        }finally {
+            stream.close();
         }
 
         return booksList;

@@ -1,10 +1,9 @@
 package models;
 
 import enums.Role;
-
 import java.util.regex.Pattern;
 
-public class Person implements Comparable<Person>{
+public class Person implements Comparable<Person>, interfaces.Person {
     private String name;
     private int id;
     private String role;
@@ -15,6 +14,13 @@ public class Person implements Comparable<Person>{
         return request;
     }
 
+    /**
+     *  The constructor handles if role supplies is valid
+     *  It sets the level of the teacher to 17
+     *  @param id
+     *  @param name
+     *  @params role
+     * */
     public Person(int id, String name, String role) throws InstantiationException {
 
         Role roles;
@@ -56,6 +62,11 @@ public class Person implements Comparable<Person>{
         else return -1;
     }
 
+    /**
+     *  Assign level to students (e.g jss 2 => (2+1), ss 2 =>(2+1)^2)
+     *  @param level
+     *  @return String
+     * */
     public String setLevel(String level){
         String message;
         if(!this.levelValidity(level)){
@@ -88,6 +99,11 @@ public class Person implements Comparable<Person>{
         }
     }
 
+    /**
+     *  The validates the input(level) of students (JSS1, JSS2, JSS3, SS1, SS2, SS3)
+     *  @param studentClass
+     *  return boolean
+     * */
     private boolean levelValidity(String studentClass){
         boolean validLevel = Pattern.compile("^[J]?([S]*)[1-3]$",
                 Pattern.CASE_INSENSITIVE).matcher(studentClass).find();

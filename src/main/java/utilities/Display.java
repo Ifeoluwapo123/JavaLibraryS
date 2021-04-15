@@ -2,12 +2,17 @@ package utilities;
 
 import models.Book;
 import models.Person;
-
 import java.util.List;
 import java.util.Map;
 
 public class Display<M,T,E> {
 
+    /**
+     *  parameter 1 strictly of person type and parameter 2 can be either
+     *  an ArrayList of Books or Map of Records
+     *  @param obj
+     *  @param obj2
+     * */
     public  <M, T> void displayRecordInformation(M obj, T obj2) {
        if(obj instanceof Person && obj2 instanceof List){
 

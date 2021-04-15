@@ -5,12 +5,30 @@ import enums.Sorting;
 import jsonParser.JsonFileReader;
 import models.Book;
 import models.Person;
+import java.io.IOException;
 import java.util.*;
 
 public class BookStore{
-    private static List<Book> books = JsonFileReader.parseJsonFile("books.json");;
-    public  static  int bookId = books.size();
+    private static List<Book> books;
     private static Display<Book, Object, Object> display = new Display<>();
+
+    static {
+        try {
+            books = JsonFileReader.parseJsonFile("books.json");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     *  comparator object used in the get book method, to search a single book
+     *  using binary search
+     * */
+    private static Comparator<Book> comparator = new Comparator<Book>() {
+        public int compare(Book book, Book another) {
+            return book.getTitle().compareTo(another.getTitle());
+        }
+    };
 
     public static List<Book> getAllBooks(){
         return books;
@@ -22,9 +40,16 @@ public class BookStore{
         books = allBooks;
     }
 
-    public static List<Book> sortBookBy(Person person, String params){
-        if(person.getRole().equalsIgnoreCase("librarian")){
-            Sorting sort = validateInputsToSort(params);
+    /**
+     *  Sorting books base on page, year, author, country and category
+     *  Used by the librarian
+     *  @param librarian
+     *  @param bookInfo
+     *  @return List
+     * */
+    public static List<Book> sortBookBy(Person librarian, String bookInfo){
+        if(librarian.getRole().equalsIgnoreCase("librarian")){
+            Sorting sort = validateInputsToSort(bookInfo);
             if(sort == null) return null;
 
             List sortedBook = getAllBooks();
@@ -63,6 +88,11 @@ public class BookStore{
         }
     }
 
+    /**
+     *  Sorting books by category (fiction, history, journey, literature and programming)
+     *  @param category
+     *  @return  List
+     * */
     public static List<Book> searchBookByCategory(String category){
         BookCategories categories;
         List searchItemLists = new ArrayList();
@@ -82,13 +112,13 @@ public class BookStore{
             case LITERATURE:
             case PROGRAMMING:
 
-                for (Book book: getAllBooks()) {
-                    if(book.getCategory().equalsIgnoreCase(category)){
-                        searchItemLists.add(book);
-                    }
+            for (Book book: getAllBooks()) {
+                if(book.getCategory().equalsIgnoreCase(category)){
+                    searchItemLists.add(book);
                 }
+            }
 
-                break;
+            break;
         }
 
         display.displayBookInformation(searchItemLists);
@@ -138,12 +168,6 @@ public class BookStore{
         return searchItemLists;
     }
 
-    public static Comparator<Book> comparator = new Comparator<Book>() {
-        public int compare(Book book, Book another) {
-            return book.getTitle().compareTo(another.getTitle());
-        }
-    };
-
     public static List<Book> getBook(String title)  {
         List borrowBook = new ArrayList();
 
@@ -156,12 +180,9 @@ public class BookStore{
             borrowBook.add(book);
         }
 
-//        display.displayBookInformation(borrowBook);
-
         return borrowBook;
 
     }
-
     @Override
     public String toString() {
         String bookStore = "BookStore\n";
