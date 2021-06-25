@@ -1,6 +1,11 @@
 package models;
 
 import enums.Role;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
 
 public class Person implements Comparable<Person>, interfaces.Person {
@@ -9,6 +14,8 @@ public class Person implements Comparable<Person>, interfaces.Person {
     private String role;
     private int level;
     private String request;
+    public static Queue<Person> peopleQueue = new ConcurrentLinkedQueue<>();
+    public static List<String> allRequests = new ArrayList<>();
 
     public String getRequest() {
         return request;
@@ -141,6 +148,14 @@ public class Person implements Comparable<Person>, interfaces.Person {
 
     public void setRequest(String request) {
         this.request = request;
+    }
+
+    public void makeBookRequest(String bookTitle){
+        if(!allRequests.contains(bookTitle)) allRequests.add(bookTitle);
+        this.request = bookTitle;
+        peopleQueue.add(this);
+        System.out.println(this.getRole()+"=>"+this.getName()+", " +
+                "You've successfully made a request for a book, titled,"+bookTitle);
     }
 
     public int getId() {

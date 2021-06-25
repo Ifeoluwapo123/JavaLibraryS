@@ -1,41 +1,38 @@
 import controllers.BookController;
 import controllers.PersonController;
 import models.Person;
+import services.serviceImplementations.LibrarianImplementation;
+import java.util.*;
 
 public class App {
     public static void main(String[] args) throws InstantiationException {
 
         Person librarian = new Person(29, "Amos James", "Librarian");
-        Person teacher1 = new Person(33, "George Tim", "Teacher");
-        Person teacher2 = new Person(35, "Sunday Anthony", "Teacher");
-        Person teacher3 = new Person(43, "Abraham Edward", "Teacher");
-        Person student1 = new Person(21, "Adewale Adekunle", "Student");
-        Person student2 = new Person(19, "Henry Clinton", "Student");
-        Person student3 = new Person(20, "John Aron", "Student");
 
         BookController.searchBook();
+        //PersonController.createPerson();
+        PersonController.handleCreateVersion2();
 
-        PersonController.demonstratePriorityAmongTeachers(librarian, teacher1, teacher2, teacher3, "Things Fall Apart");
+        PriorityQueue<Person> priorityQueue = new PriorityQueue<>();
 
-        PersonController.demonstratePriorityAmongTeacherAndStudent(librarian, teacher2, student1, "Oedipus the King");
+        Person.allRequests.forEach(request -> {
+            Person.peopleQueue.forEach(person -> {
+                if (request.equals(person.getRequest())) {
+                    priorityQueue.add(person);
+                }
+            });
 
-        PersonController.demonstratePriorityAmongStudents(librarian, student2, student3, "The Canterbury Tales");
+            if(priorityQueue.size() == 1) LibrarianImplementation.issueBook(librarian, priorityQueue.peek());
+            else LibrarianImplementation.issueBook(librarian, priorityQueue);
 
-        PersonController.demonstrateWithAPerson(librarian, teacher2, "Blindness");
+            priorityQueue.clear();
+        });
 
         BookController.getRecordsOfBookBorrowed(librarian);
 
-        Person teacher6 = new Person(33, "Rebecca Sterling", "Teacher");
+        Person.peopleQueue.forEach(person -> BookController.userReturnBookToLibrary(librarian, person));
 
-        BookController.userReturnBookToLibrary(librarian, teacher1);
-        BookController.userReturnBookToLibrary(librarian, teacher2);
-        BookController.userReturnBookToLibrary(librarian, teacher3);
-        BookController.userReturnBookToLibrary(librarian, student3);
-        BookController.userReturnBookToLibrary(librarian, student2);
-        BookController.userReturnBookToLibrary(librarian, student1);
-        BookController.userReturnBookToLibrary(librarian, teacher6);
-
-        BookController.addBookToLibrary(librarian);
+        //BookController.addBookToLibrary(librarian);
 
     }
 }

@@ -26,7 +26,9 @@ public class BookController {
 
     public static void addBookToLibrary(Person librarian){
         Book newBook = LibrarianImplementation.createBook(librarian);
-        System.out.println("Newly added book to the store "+BookStore.getBook(newBook.getTitle()));
+        BookStore store = new BookStore();
+        System.out.println("Newly added book to the store "
+                +store.searchByTitle().searchByParams(newBook.getTitle()));
     }
 
     /**
@@ -38,19 +40,20 @@ public class BookController {
 
         System.out.println("Search By the following Enter 1 for page, 2 for author ....\n");
         System.out.println(" (1)Programming \n (2)Fiction\n (3) Journals\n (4) History\n (q) Quit\n");
+        BookStore bookStore = new BookStore();
         switch (scan.nextLine())
         {
             case "1":
-                BookStore.searchBookByCategory("programming");
+                bookStore.searchByCategory().searchByParams("Programming");
                 return true;
             case "2":
-                BookStore.searchBookByCategory("fiction");
+                bookStore.searchByCategory().searchByParams("fiction");
                 return true;
             case "3":
-                BookStore.searchBookByCategory("journals");
+                bookStore.searchByCategory().searchByParams("journals");
                 return true;
             case "4":
-                BookStore.searchBookByCategory("history");
+                bookStore.searchByCategory().searchByParams("history");
                 return true;
 
             case "q": return  false;

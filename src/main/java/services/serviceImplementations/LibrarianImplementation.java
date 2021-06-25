@@ -65,11 +65,11 @@ public class LibrarianImplementation implements Librarian {
      *  @param sc1
      *  @params int
      * */
-    private static int handlingNumberFormatException(String prompt, Scanner sc1) {
+    public static int handlingNumberFormatException(String prompt, Scanner sc1) {
         int intInput = 0;
         while (true) {
             System.out.println(prompt);
-            String stringInput = sc1.next();
+            String stringInput = sc1.nextLine();
             try {
                 intInput = Integer.parseInt(stringInput);
                 break;
@@ -92,12 +92,10 @@ public class LibrarianImplementation implements Librarian {
             records += "Staff ID: "+ person.getId()+"\n";
         else records += "Student ID: "+ person.getId()+"\n";
 
-
-
         records += "Name: "+ person.getName()+"\n"+
                 "Book Title: "+ book.get(0).getTitle()+"\n"+
-                "Date Issued: "+generateCurrentDate()+" "+getCurrentTime()+"\n"+
-                "Return Date: "+getDateToReturnBook()+"\n";
+                "Date Issued: "+getCurrentDate.generateTime()+" "+getCurrentTime.generateTime()+"\n"+
+                "Return Date: "+getDateToReturnBook.generateTime()+"\n";
 
         LibraryRecords.updateDateRecord(person.getId(),records);
     }
@@ -126,9 +124,7 @@ public class LibrarianImplementation implements Librarian {
         String message = ""; int counter = 0;
         records = LibraryRecords.getRecords();
 
-        for (Map.Entry<Integer, String> each: records.entrySet()) {
-            if(each.getKey().equals(person.getId())) counter++;
-        }
+        if(records.containsKey(person.getId())) counter++;
 
         if(counter == 0) {
             message = person.getName()+": You did not borrow any book from us";
@@ -153,6 +149,8 @@ public class LibrarianImplementation implements Librarian {
     public static <T> String issueBook(Person librarian, T object){
         String message = "";
         if(librarian.getRole().equalsIgnoreCase("librarian")){
+            BookStore store = new BookStore();
+
             if(object instanceof Person){
                 Person person = (Person) object;
 
@@ -164,7 +162,7 @@ public class LibrarianImplementation implements Librarian {
                     return "failed";
                 }
 
-                List<Book> bookIssued = BookStore.getBook(request);;
+                List<Book> bookIssued = store.searchByTitle().searchByParams(request);
 
                 if(bookIssued.size() > 0){
                     message = "successful";
@@ -185,7 +183,7 @@ public class LibrarianImplementation implements Librarian {
                     return "failed";
                 }
 
-                List<Book> bookIssued = BookStore.getBook(request);
+                List<Book> bookIssued = store.searchByTitle().searchByParams(request);
 
                 int copiesOfBook = bookIssued.get(0).getNumOfCopies();
 
@@ -218,12 +216,16 @@ public class LibrarianImplementation implements Librarian {
         return message;
     }
 
-   public static void makeBookRequest(Person librarian, Person person, String title){
-        person.setRequest(title);
-        System.out.println(person.getName()+", You've successfully made a request for a book");
-   }
+    public static void makeBookRequest(Person librarian, Person person, String title){
+       if(librarian.getRole().equalsIgnoreCase("Librarian")){
+            person.setRequest(title);
+            System.out.println(person.getName()+", You've successfully made a request for a book");
+       }else{
+           System.out.println("Can't access this resource");
+       }
+    }
 
-    private static String generateCurrentDate(){
+    static DateInterface getCurrentDate = () -> {
         String date = "";
 
         DateFormat Date = DateFormat.getDateInstance();
@@ -232,22 +234,23 @@ public class LibrarianImplementation implements Librarian {
         String currentDate = Date.format(calendar.getTime());
 
         return currentDate;
-    }
+    };
 
-    private static String getCurrentTime(){
+    static DateInterface getCurrentTime = () -> {
         Calendar calendar = Calendar.getInstance();
         int hours = calendar.get(Calendar.HOUR_OF_DAY);
         int minutes = calendar.get(Calendar.MINUTE);
         int seconds = calendar.get(Calendar.SECOND);
 
         return " "+hours+":"+minutes+":"+seconds;
-    }
+    };
 
-    private static String getDateToReturnBook(){
-        String currentDate = generateCurrentDate();
+    static DateInterface getDateToReturnBook = () -> {
+        String currentDate = getCurrentDate.generateTime();
         String[] str = currentDate.split(" ");
         str[1] = Integer.parseInt(str[1].substring(0, str[1].indexOf(",")))+defaultDay+"";
 
         return str[0]+" "+str[1]+", "+str[2];
-    }
+    };
+
 }

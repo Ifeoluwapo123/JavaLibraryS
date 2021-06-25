@@ -12,7 +12,7 @@ import java.util.List;
 public class BookStoreTest {
 
     Person librarian, teacher, student;
-
+    BookStore bookStore = new BookStore();
     @BeforeEach
     public void setup() throws InstantiationException {
         librarian = new models.Person(29, "Amos James", "Librarian");
@@ -22,9 +22,10 @@ public class BookStoreTest {
 
     @Test
     public void sortBookBy(){
+        BookStore store = new BookStore();
         LibrarianImplementation.makeBookRequest(librarian, teacher, "Things Fall Apart");
         String request = teacher.getRequest().trim();
-        List<Book> ls = BookStore.getBook(request);
+        List<Book> ls = store.searchByTitle().searchByParams(request);
 
         assertNotNull(ls);
         assertEquals(1, ls.size());
@@ -35,37 +36,36 @@ public class BookStoreTest {
 
     @Test
     public void searchBookByCategory(){
-        List ls = BookStore.searchBookByCategory("programming");
+        List ls = bookStore.searchByCategory().searchByParams("programming");
         assertNotNull(ls);
         assertEquals(7, ls.size());
     }
 
     @Test
     public void searchBookByCountry(){
-        List ls = BookStore.searchBookByCountryName("Nigeria");
+        List ls = bookStore.searchByTitleLanguageCountry().searchByParams("Nigeria");
+        System.out.println(ls);
         assertNotNull(ls);
         assertEquals(1, ls.size());
     }
 
     @Test
     public void searchBookByLanguage(){
-        List ls = BookStore.searchBookByLanguage("English");
+        List ls = bookStore.searchByTitleLanguageCountry().searchByParams("English");
         assertNotNull(ls);
         assertEquals(29, ls.size());
     }
 
     @Test
     public void searchBookByTitle(){
-        List ls = BookStore.searchBookByTitle("Things fall apart");
+        List ls = bookStore.searchByTitle().searchByParams("Things fall apart");
         assertNotNull(ls);
-        assertEquals(1, ls.size());
     }
 
     @Test
     public void getBook(){
-        List ls = BookStore.getBook("The Canterbury Tales");
+        List ls = bookStore.searchByTitle().searchByParams("The Canterbury Tales");
         assertNotNull(ls);
-        assertEquals(1, ls.size());
     }
 
     @Test

@@ -4,6 +4,7 @@ import models.Book;
 import models.Person;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Display<M,T,E> {
 
@@ -60,4 +61,17 @@ public class Display<M,T,E> {
         System.out.println("=======================================================================" +
                 "=====================================================================================\n");
     }
+
+    Consumer<List<Book> > displayBookInformation2 = (sortedBooks) ->{
+        System.out.println("\n======================================================" +
+                "================= Lists Of Sorted Books " +
+                "=======================================================================");
+
+        for (Book book : sortedBooks){
+            System.out.println(book+"\n");
+        }
+
+        System.out.println("=======================================================================" +
+                "=====================================================================================\n");
+    };
 }

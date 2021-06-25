@@ -5,8 +5,10 @@ import enums.Sorting;
 import jsonParser.JsonFileReader;
 import models.Book;
 import models.Person;
+import utilities.Interfaces.BookStoreService;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BookStore{
     private static List<Book> books;
@@ -93,15 +95,15 @@ public class BookStore{
      *  @param category
      *  @return  List
      * */
-    public static List<Book> searchBookByCategory(String category){
+    BookStoreService searchByCategory = params -> {
         BookCategories categories;
         List searchItemLists = new ArrayList();
 
         try {
-            categories = BookCategories.valueOf(category.toUpperCase());
+            categories = BookCategories.valueOf(params.toUpperCase());
         }catch (IllegalArgumentException error){
             System.out.println("Enter valid Category:\n e.g FICTION, HISTORY, JOURNALS\n" +
-                               "\t\tLITERATURE AND PROGRAMMING");
+                    "\t\tLITERATURE AND PROGRAMMING");
             return null;
         }
 
@@ -112,66 +114,54 @@ public class BookStore{
             case LITERATURE:
             case PROGRAMMING:
 
-            for (Book book: getAllBooks()) {
-                if(book.getCategory().equalsIgnoreCase(category)){
-                    searchItemLists.add(book);
-                }
-            }
+                getAllBooks().stream()
+                        .filter(item -> item.getCategory().equalsIgnoreCase(params))
+                        .forEach(book -> searchItemLists.add(book));
 
-            break;
+                break;
         }
 
         display.displayBookInformation(searchItemLists);
         return searchItemLists;
+    };
 
-    }
-
-    public static List<Book> searchBookByTitle(String title){
+    BookStoreService searchByTitleLanguageCountry = params -> {
         List searchItemLists = new ArrayList();
 
-        for (Book book: getAllBooks()) {
-            if(book.getTitle().equalsIgnoreCase(title)){
-                searchItemLists.add(book);
+        long dataTitle = getAllBooks().stream()
+                .filter(item -> item.getTitle().equalsIgnoreCase(params)).count();
+
+        long dataLanguage = getAllBooks().stream()
+                .filter(item -> item.getLanguage().equalsIgnoreCase(params)).count();
+
+        if(dataTitle > 0){
+            getAllBooks()
+                    .stream()
+                    .filter(item -> item.getTitle().equalsIgnoreCase(params))
+                    .forEach(book -> searchItemLists.add(book));
+        }else{
+            if(dataLanguage > 0)
+                getAllBooks()
+                        .stream()
+                        .filter(item -> item.getLanguage().equalsIgnoreCase(params))
+                        .forEach(book -> searchItemLists.add(book));
+            else{
+                getAllBooks()
+                        .stream()
+                        .filter(item -> item.getCountry().equalsIgnoreCase(params))
+                        .forEach(book -> searchItemLists.add(book));
             }
         }
 
         display.displayBookInformation(searchItemLists);
 
         return searchItemLists;
-    }
+    };
 
-    public static List<Book> searchBookByCountryName(String country){
-        List searchItemLists = new ArrayList();
-
-        for (Book book: getAllBooks()) {
-            if(book.getCountry().equalsIgnoreCase(country)){
-                searchItemLists.add(book);
-            }
-        }
-
-        display.displayBookInformation(searchItemLists);
-
-        return searchItemLists;
-    }
-
-    public static List<Book> searchBookByLanguage(String language){
-        List searchItemLists = new ArrayList();
-
-        for (Book book: getAllBooks()) {
-            if(book.getLanguage().equalsIgnoreCase(language)){
-                searchItemLists.add(book);
-            }
-        }
-
-        display.displayBookInformation(searchItemLists);
-
-        return searchItemLists;
-    }
-
-    public static List<Book> getBook(String title)  {
+    BookStoreService searchByTitle = param -> {
         List borrowBook = new ArrayList();
 
-        Book book = new Book(title);
+        Book book = new Book(param);
         Collections.sort(getAllBooks(), comparator);
 
         int index = Collections.binarySearch(getAllBooks(), book, comparator);
@@ -181,17 +171,26 @@ public class BookStore{
         }
 
         return borrowBook;
+    };
 
+    public BookStoreService searchByTitleLanguageCountry() {
+        return searchByTitleLanguageCountry;
     }
-    @Override
-    public String toString() {
+
+    public BookStoreService searchByTitle() {
+        return searchByTitle;
+    }
+
+    public BookStoreService searchByCategory() {
+        return searchByCategory;
+    }
+
+    public static String displayAllBooks() {
         String bookStore = "BookStore\n";
 
-        for (Book book: books) {
-            bookStore += book.toString();
-        }
+        bookStore += getAllBooks().stream().map(book -> book.toString()).collect(Collectors.joining(""));
 
-        display.displayBookInformation(books);
+        display.displayBookInformation2.accept(books);
 
         return bookStore;
     }
@@ -207,6 +206,11 @@ public class BookStore{
         }
 
         return sort;
+    }
+
+    //testing
+    public static void main(String[] args){
+        displayAllBooks();
     }
 
 }
